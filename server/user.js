@@ -16,6 +16,21 @@ Router.get('/list',function (req, res) {
   })
 })
 
+Router.post('/update',function(req,res) {
+  const userId = req.cookies.userId
+  if(!userId) {
+    return res.json({code:1,msg:'用户信息更新失败'})
+  }
+  const body = req.body
+  User.findByIdAndUpdate(userId,body,function (err,doc) {
+    const data = Object.assign({},{
+      user:doc.user,
+      type:doc.type
+    },body)
+    return res.json ({code:0,data:data})
+  })
+})
+
 Router.post('/login',function (req, res) {
   const {user,pwd} = req.body
   User.findOne({user,pwd:md5Pwd(pwd)},_filter,function (err, doc) {

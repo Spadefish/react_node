@@ -8,8 +8,11 @@ import { BrowserRouter, Route, Redirect,Switch } from 'react-router-dom'
 import AuthRoute from './component/authroute/authroute'
 import Register from './container/register/register'
 import Login from './container/login/login'
+import BossInfo from './container/bossinfo/bossinfo'
+import GeniusInfo from './container/geniusinfo/geniusinfo'
+import DashBoard from './component/dashboard/dashboard'
 import reducers from './reducer'
-import './config'
+// import './config'
 import './index.css'
 
 const store = createStore(reducers, compose(
@@ -21,8 +24,13 @@ ReactDom.render(
 		<BrowserRouter>
 			<div>
 				<AuthRoute/>
-				<Route path='/login' component={Login}/>
-				<Route path='/register' component={Register}/>
+				<Switch>
+          <Route path='/login' component={Login}/>
+          <Route path='/register' component={Register}/>
+					<Route path='/bossinfo' component={BossInfo}/>
+					<Route path='/geniusinfo' component={GeniusInfo}/>
+					<Route component={DashBoard}/>
+				</Switch>
 			</div>
 		</BrowserRouter>
 	</Provider>),
