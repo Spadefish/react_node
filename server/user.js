@@ -11,8 +11,10 @@ Router.get('/list',function (req, res) {
   // User.remove({},function (err,doc) {
   //
   // })
-  User.find({},function(err,doc){
-    return res.json(doc)
+  const { type } = req.query
+  User.find({type},function(err,doc){
+    console.log('doc======',doc)
+    return res.json({code:0,data:doc})
   })
 })
 
