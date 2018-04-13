@@ -4,64 +4,65 @@ const Router = express.Router()
 const model = require('./model')
 const User = model.getModel('user')
 // 0 在查询结果中不显示此字段 1 显示
-const _filter = {'pwd':0,'__v':0}
+// 在查询过程中 参数总是以对象的形式来传递
+const _filter = {'pwd': 0, '__v': 0}
 
-Router.get('/list',function (req, res) {
+Router.get('/list', function (req, res) {
   // 清空模拟数据
   // User.remove({},function (err,doc) {
   //
   // })
-  const { type } = req.query
-  User.find({type},function(err,doc){
-    console.log('doc======',doc)
-    return res.json({code:0,data:doc})
+  const {type} = req.query
+  User.find({type}, function (err, doc) {
+    // console.log('doc======',doc)
+    return res.json({code: 0, data: doc})
   })
 })
 
-Router.post('/update',function(req,res) {
+Router.post('/update', function (req, res) {
   const userId = req.cookies.userId
-  if(!userId) {
-    return res.json({code:1,msg:'用户信息更新失败'})
+  if (!userId) {
+    return res.json({code: 1, msg: '用户信息更新失败'})
   }
   const body = req.body
-  User.findByIdAndUpdate(userId,body,function (err,doc) {
-    const data = Object.assign({},{
-      user:doc.user,
-      type:doc.type
-    },body)
-    return res.json ({code:0,data:data})
+  User.findByIdAndUpdate(userId, body, function (err, doc) {
+    const data = Object.assign({}, {
+      user: doc.user,
+      type: doc.type
+    }, body)
+    return res.json({code: 0, data: data})
   })
 })
 
-Router.post('/login',function (req, res) {
-  const {user,pwd} = req.body
-  User.findOne({user,pwd:md5Pwd(pwd)},_filter,function (err, doc) {
+Router.post('/login', function (req, res) {
+  const {user, pwd} = req.body
+  User.findOne({user, pwd: md5Pwd(pwd)}, _filter, function (err, doc) {
     if (!doc) {
-      return res.json({code:1,msg:'用户名或密码不正确'})
+      return res.json({code: 1, msg: '用户名或密码不正确'})
     }
     // 存储cookie
-    res.cookie('userId',doc._id)
-    return res.json({code:0,data:doc})
+    res.cookie('userId', doc._id)
+    return res.json({code: 0, data: doc})
   })
 })
 
-Router.post('/register',function(req,res){
+Router.post('/register', function (req, res) {
   // console.log(req.body)
-  const {user,pwd,type} = req.body
-  User.findOne({user},function (err,doc) {
-    if(doc) {
-      return res.json({code:1,msg:'该用户已存在'})
+  const {user, pwd, type} = req.body
+  User.findOne({user}, function (err, doc) {
+    if (doc) {
+      return res.json({code: 1, msg: '该用户已存在'})
     }
 
-    const userModel = new User({user,type,pwd:md5Pwd(pwd)})
-    userModel.save(function(err,doc) {
-      if(err) {
-        return res.json({code:1,msg:'后端接口有误'})
+    const userModel = new User({user, type, pwd: md5Pwd(pwd)})
+    userModel.save(function (err, doc) {
+      if (err) {
+        return res.json({code: 1, msg: '后端接口有误'})
       }
-      console.log('注册保存====',doc)
-      const {user,type,_id} = doc
-      res.cookie('userId',_id)
-      return res.json({code:0,data:{user,type,_id}})
+      // console.log('注册保存====',doc)
+      const {user, type, _id} = doc
+      res.cookie('userId', _id)
+      return res.json({code: 0, data: {user, type, _id}})
     })
     // User.create({user,pwd:md5Pwd(pwd),type},function (err,doc) {
     //   if(err) {
@@ -71,28 +72,28 @@ Router.post('/register',function(req,res){
     // })
   })
 })
-Router.get('/info',function (req,res) {
+Router.get('/info', function (req, res) {
   const {userId} = req.cookies
   // 用户有没有cookie
-  if (!userId){
-    return res.json({code:1})
+  if (!userId) {
+    return res.json({code: 1})
   }
   // 查询
-  User.findOne({_id:userId,_filter,function (err,doc) {
-      if(err) {
-        return res.json({code:1,msg:'后端接口有误'})
-      }
-      if (doc) {
-        return res.json({code:0,data:doc})
-      }
-    }})
+  User.findOne({_id: userId}, _filter, function (err, doc) {
+    if (err) {
+      return res.json({code: 1, msg: '后端接口有误'})
+    }
+    if (doc) {
+      // console.log('doc====',doc)
+      return res.json({code: 0, data: doc})
+    }
+  })
 })
 
-
 // 加强版md5
-function md5Pwd(pwd){
+function md5Pwd (pwd) {
   const salt = 'imooc_is_good_3957x8yza6!@#IUHJh~~'
-  return utils.md5(utils.md5(pwd+salt))
+  return utils.md5(utils.md5(pwd + salt))
 }
 
 module.exports = Router
