@@ -3,6 +3,7 @@ const utils = require('utility')
 const Router = express.Router()
 const model = require('./model')
 const User = model.getModel('user')
+const Chat = model.getModel('chat')
 // 0 在查询结果中不显示此字段 1 显示
 // 在查询过程中 参数总是以对象的形式来传递
 const _filter = {'pwd': 0, '__v': 0}
@@ -89,6 +90,20 @@ Router.get('/info', function (req, res) {
     }
   })
 })
+
+
+// 互动聊天接口
+Router.get('/getmsglist',function (req,res) {
+  const user = req.cookies.user
+  console.log(user)
+  Chat.find({},function (err,doc) {
+    if(!err) {
+      res.json({code:0,msgs:doc})
+    }
+  })
+})
+
+
 
 // 加强版md5
 function md5Pwd (pwd) {
