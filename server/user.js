@@ -94,12 +94,18 @@ Router.get('/info', function (req, res) {
 
 // 互动聊天接口
 Router.get('/getmsglist',function (req,res) {
-  const user = req.cookies.user
-  console.log(user)
-  Chat.find({},function (err,doc) {
-    if(!err) {
-      res.json({code:0,msgs:doc})
-    }
+  const user = req.cookies.userId
+  console.log('user======',user)
+  User.find ({},function (e, userdoc) {
+    let users= {}
+    userdoc.forEach(v=>{
+      users[v._id] = {name:v.user,avatar:v.avatar}
+    })
+    Chat.find({'$or':[{form:user},{to:user}]},function (err,doc) {
+      if(!err) {
+        res.json({code:0,msgs:doc,users:users})
+      }
+    })
   })
 })
 

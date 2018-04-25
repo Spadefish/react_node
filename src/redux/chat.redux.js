@@ -13,6 +13,7 @@ const MSG_READ = 'MSG_READ'
 
 const initState = {
   chatMsg: [],
+  users:{},
   unRead: 0
 }
 
@@ -20,9 +21,11 @@ const initState = {
 export function chat (state = initState, action) {
   switch (action.type) {
     case MSG_LIST:
-      return {...state, chatMsg: action.payload, unRead: action.payload.filter(v => !v.read).length}
+      return {...state,users:action.payload.users, chatMsg: action.payload.msgs, unRead: action.payload.msgs.filter(v => !v.read && v.to === action.payload.userId).length}
     case MSG_RECV:
-      return {...state, chatMsg: [...state.chatMsg, action.payload], unRead: state.unRead + 1}
+      const num = action.payload.to === action.userId? 1:0
+      console.log(action.payload)
+      return {...state, chatMsg: [...state.chatMsg, action.payload], unRead: state.unRead + num}
     // case MSG_READ:
 
     default:
@@ -30,16 +33,18 @@ export function chat (state = initState, action) {
   }
 }
 
-function msgList (msgs) {
-  return {type: MSG_LIST, payload: msgs}
+function msgList (msgs,users,userId) {
+  return {type: MSG_LIST, payload: {msgs,users,userId}}
 }
 
 export function getMsgList () {
-  return dispatch => {
+  return (dispatch,getState) => {
     axios.get('/user/getmsglist')
       .then(res => {
+        console.log('getstate',getState())
         if (res.status === 200 && res.data.code === 0) {
-          dispatch(msgList(res.data.msgs))
+          const userId = getState().user._id
+          dispatch(msgList(res.data.msgs,res.data.users, userId))
         }
       })
   }
@@ -51,15 +56,16 @@ export function sendMsg ({from, to, msg}) {
   }
 }
 
-function msgRecv (msg) {
-  return {type: MSG_RECV, payload: msg}
+function msgRecv (msg,userId) {
+  return {userId,type: MSG_RECV, payload: msg}
 }
 
 export function recvMsg () {
-  return dispatch => {
+  return (dispatch,getState) => {
     socket.on('receiveMsg', function (data) {
+      const userId = getState().user._id
       console.log('receiveMsg', data)
-      dispatch(msgRecv(data))
+      dispatch(msgRecv(data,userId))
     })
   }
 }

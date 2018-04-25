@@ -1,10 +1,10 @@
 import React from 'react'
-import { List, InputItem , NavBar} from 'antd-mobile'
+import { List, InputItem , NavBar,Icon} from 'antd-mobile'
 import io from 'socket.io-client'
 import {connect} from 'react-redux'
 import {getMsgList, sendMsg,recvMsg} from '../../redux/chat.redux'
-
-const socket = io('ws://localhost:9093')
+import {getChatId} from '../../util'
+// const socket = io('ws://localhost:9093')
 
 @connect(
   state=>state,
@@ -25,8 +25,15 @@ class Chat extends React.Component {
     //   })
     //   console.log(this.state)
     // })
-    this.props.getMsgList()
-    this.props.recvMsg()
+    // 转移到dashbord里面去
+    // this.props.getMsgList()
+    // this.props.recvMsg()
+
+    // 页面直接进来加载数据
+    if (!this.props.chat.chatMsg.length) {
+      this.props.getMsgList()
+      this.props.recvMsg()
+    }
   }
   handleSubmit () {
     // socket.emit('sendMsg',{text:this.state.text})
@@ -40,15 +47,28 @@ class Chat extends React.Component {
   }
   render () {
     // console.log(this.props)
-    const user = this.props.match.params.user
+    const userId = this.props.match.params.user
     const Item = List.Item
+    const users = this.props.chat.users
+    if (!users[userId]) {
+      return null
+    }
+    // 绑定聊天的俩个人 实现消息过滤
+    const chatId = getChatId(userId,this.props.user._id)
+    const chatMsgs = this.props.chat.chatMsg.filter(v=> v.chatId === chatId)
     return (
       <div id='chat-page'>
-        <NavBar mode='dark'>
-          {this.props.match.params.user}
+        <NavBar
+          mode='dark'
+          icon={<Icon type="left" />}
+          onLeftClick={()=> {
+            this.props.history.goBack()
+          }}
+        >
+          {users[userId].name}
         </NavBar>
-        {this.props.chat.chatMsg.map( v =>{
-          return v.from === user? (
+        {chatMsgs.map( v =>{
+          return v.from === userId? (
             <List key={v._id}>
               <Item>
                 {v.content}
