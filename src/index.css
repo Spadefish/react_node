@@ -29,9 +29,20 @@
     flex-basis: auto;
 }
 
+#chat-page .am-list {
+    height: auto;
+}
+
 #chat-page .chat-me .am-list-content {
     padding-right: 15px;
     text-align: right;
+}
+
+#chat-page .am-grid-icon{
+    display: none;
+}
+#chat-page .am-grid-text{
+    margin-top: 0;
 }
 
 .stick-footer {
