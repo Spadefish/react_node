@@ -138,7 +138,7 @@ class Chat extends React.Component {
             isCarousel = {true}
             onClick={el=>{
               this.setState ({
-                text: this.state.text + el.text 
+                text: this.state.text + el.text
               })
               console.log(el)
             }}
